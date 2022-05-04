@@ -1,17 +1,12 @@
-package com.example.biomecardapp2.ui.notifications
+package com.example.biomecardapp2.ui.scan
 
-import android.app.SearchManager
-import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -21,17 +16,13 @@ import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import com.budiyev.android.codescanner.ScanMode
-import com.example.biomecardapp2.BiomeMain
-import com.example.biomecardapp2.MainActivity
-import com.example.biomecardapp2.databinding.ActivityBiomeMainBinding
-import com.example.biomecardapp2.databinding.FragmentNotificationsBinding
-import com.google.zxing.integration.android.IntentIntegrator
+import com.example.biomecardapp2.databinding.FragmentScanBinding
 
 private const val CAMERA_REQUEST_CODE = 101
 
-class NotificationsFragment : Fragment(){
+class ScanFragment : Fragment(){
     private lateinit var codeScanner: CodeScanner
-    private var _binding: FragmentNotificationsBinding? = null
+    private var _binding: FragmentScanBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -43,16 +34,14 @@ class NotificationsFragment : Fragment(){
         savedInstanceState: Bundle?
     ): View {
         super.onCreate(savedInstanceState)
-        val notificationsViewModel =
-            ViewModelProvider(this).get(NotificationsViewModel::class.java)
 
-        _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
+            ViewModelProvider(this).get(ScanViewModel::class.java)
+
+        _binding = FragmentScanBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textNotifications
-        notificationsViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+
+
         setupPermissions()
         codeScanner()
         return root

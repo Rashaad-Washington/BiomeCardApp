@@ -12,14 +12,14 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.biomecardapp2.ui.dashboard.DashboardFragment"
+        android:id="@+id/navigation_collection"
+        android:name="com.example.biomecardapp2.ui.collections.CollectionsFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_collections" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.biomecardapp2.ui.notifications.NotificationsFragment"
+        android:id="@+id/navigation_scan"
+        android:name="com.example.biomecardapp2.ui.scan.ScanFragment"
         android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_scan" />
 </navigation>

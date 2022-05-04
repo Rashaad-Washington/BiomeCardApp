@@ -1,11 +1,6 @@
 package com.example.biomecardapp2
 
-import android.app.SearchManager
-import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -13,9 +8,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.biomecardapp2.databinding.ActivityBiomeMainBinding
-import com.example.biomecardapp2.databinding.FragmentNotificationsBinding
-import com.example.biomecardapp2.databinding.ObjectArtBinding
-import com.google.zxing.integration.android.IntentIntegrator
 
 class BiomeMain : AppCompatActivity() {
 
@@ -37,7 +29,7 @@ class BiomeMain : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_home, R.id.navigation_scan, R.id.navigation_collection
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
