@@ -27,12 +27,9 @@ class BiomeMain : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityBiomeMainBinding.inflate(layoutInflater)
-        val bindingScan: FragmentNotificationsBinding = FragmentNotificationsBinding.inflate(layoutInflater)
+        //val bindingScan: FragmentNotificationsBinding = FragmentNotificationsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        bindingScan.qrButton.setOnClickListener {
-            Toast.makeText(applicationContext, "test", Toast.LENGTH_LONG).show()
-            bindingScan.textView.setText("TEsting")
-        }
+
         val navView: BottomNavigationView = binding.navView
 
         val navController = findNavController(R.id.nav_host_fragment_activity_biome_main)
@@ -45,24 +42,10 @@ class BiomeMain : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        var result = IntentIntegrator.parseActivityResult(resultCode, data)
-        if (result != null) {
-            AlertDialog.Builder(this)
-                .setMessage("Would you like to go to ${result.contents}?")
-                .setPositiveButton("Yes", DialogInterface.OnClickListener { dialogInterface, i ->
-                    val intent = Intent(Intent.ACTION_WEB_SEARCH)
-                    intent.putExtra(SearchManager.QUERY,result.contents)
-                    startActivity(intent)
-                })
-                .setNegativeButton("No",DialogInterface.OnClickListener { dialogInterface, i ->  })
-                .create()
-                .show()
-        }
-    }
+
 
     override fun onBackPressed() {
 
