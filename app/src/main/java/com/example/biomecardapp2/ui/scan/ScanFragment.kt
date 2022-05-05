@@ -1,5 +1,6 @@
 package com.example.biomecardapp2.ui.scan
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -9,14 +10,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.budiyev.android.codescanner.AutoFocusMode
-import com.budiyev.android.codescanner.CodeScanner
-import com.budiyev.android.codescanner.DecodeCallback
-import com.budiyev.android.codescanner.ErrorCallback
-import com.budiyev.android.codescanner.ScanMode
+import com.budiyev.android.codescanner.*
 import com.example.biomecardapp2.databinding.FragmentScanBinding
+import com.example.biomecardapp2.ui.collections.CollectionsFragment
+import com.example.biomecardapp2.ui.collections.imageURLs
+import kotlinx.coroutines.*
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.net.HttpURLConnection
+import java.net.URL
 
 
 private const val CAMERA_REQUEST_CODE = 101
@@ -24,6 +29,9 @@ private const val CAMERA_REQUEST_CODE = 101
 class ScanFragment : Fragment(){
     private lateinit var codeScanner: CodeScanner
     private var _binding: FragmentScanBinding? = null
+    var scannedcode : String = ""
+    public var displayStringList: MutableList<String> = mutableListOf()
+
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -42,13 +50,12 @@ class ScanFragment : Fragment(){
         val root: View = binding.root
 
 
-
         setupPermissions()
         codeScanner()
         return root
 
-
     }
+
 
     private fun codeScanner() {
         codeScanner = CodeScanner(this.requireContext(), binding.scannerView)
@@ -60,19 +67,69 @@ class ScanFragment : Fragment(){
             scanMode = ScanMode.CONTINUOUS
             isAutoFocusEnabled = true
             isFlashEnabled = false
-
+            var searchJob: Job? = null
             decodeCallback = DecodeCallback {
+                scannedcode = it.text
 
-                    binding.tvTextView.text = it.text
+
+               searchJob = CoroutineScope(Dispatchers.IO).launch {
+                   withContext(Dispatchers.Main) {
+                       Toast.makeText(
+                           context,
+                           "Checking Card", Toast.LENGTH_SHORT
+                       ).show()
+                       codeScanner.stopPreview()
+                       binding.scannerView.isVisible = false
+                   }
+                   Log.i("Work", it.text)
+
+
+                   val url = URL("https://www.biomecard.at/wp-content/uploads/2022/05/cardID.json")
+                   val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+                   var jsonStr = ""
+                   try {
+                       jsonStr = connection.getInputStream()
+                           .bufferedReader().use(BufferedReader::readText)
+                   } finally {
+                       connection.disconnect()
+                   }
+                   try {
+                       val json = JSONObject(jsonStr) //same thing as jsonString but as type JSON
+                       try {
+                           imageURLs.addtoList(json.getString(it.text))
+                           withContext(Dispatchers.Main) {
+                               Toast.makeText(
+                                   context,
+                                   "Added Card", Toast.LENGTH_LONG
+                               ).show()
+                               codeScanner.startPreview()
+                               binding.scannerView.isVisible = true
+                           }
+                       } catch (e:Exception) {
+                           withContext(Dispatchers.Main) {
+                               Toast.makeText(
+                                   context,
+                                   "Didnt find it", Toast.LENGTH_LONG
+                               ).show()
+                               codeScanner.startPreview()
+                               binding.scannerView.isVisible = true
+                           }
+                       }
+
+                   } catch (e:Exception){
+                       Log.i("ERror", "error ${e.message}")
+                   }
+               }
+
+
             }
 
             errorCallback = ErrorCallback {
                     Log.e("Main", "Camera error ${it.message}")
             }
         }
-        binding.scannerView.setOnClickListener{
-            codeScanner.startPreview()
-        }
+
+
     }
 
     override fun onResume(){

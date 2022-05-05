@@ -1,6 +1,5 @@
 package com.example.biomecardapp2.ui.collections
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
@@ -20,9 +19,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.biomecardapp2.R
 import com.example.biomecardapp2.databinding.FragmentCollectionsBinding
 import com.example.biomecardapp2.databinding.ItemViewBinding
+import com.example.biomecardapp2.ui.scan.ScanFragment
 import kotlinx.coroutines.*
 import java.net.HttpURLConnection
 import java.net.URL
+import android.content.Intent
 
 class CollectionsFragment : Fragment() {
 
@@ -32,7 +33,7 @@ class CollectionsFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private var displayStringList: MutableList<String> = mutableListOf("https://images.metmuseum.org/CRDImages/es/web-large/DP-462-001.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg", "https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg")
+    private var displayStringList: MutableList<String> = mutableListOf()
     private lateinit var adapter: MyAdapter
     private var imageJob: Job? = null
     var bitmap: Bitmap? = null
@@ -56,9 +57,14 @@ class CollectionsFragment : Fragment() {
         )
         binding.myRecyclerview.addItemDecoration(divider)
 
+
         adapter = MyAdapter()
         binding.myRecyclerview.setAdapter(adapter)
         return root
+    }
+
+    fun test(){
+
     }
 
     override fun onDestroyView() {
@@ -121,13 +127,13 @@ class CollectionsFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-            holder.setText("Card No. ${position}", displayStringList[position])
-            Log.i("bitmap", "url = ${displayStringList[position]}")
+            holder.setText("Card No. ${position}", imageURLs.getList().get(position))
+            Log.i("bitmap", "url = ${imageURLs.getList().get(position)}")
 
         }
 
         override fun getItemCount(): Int {
-            return displayStringList.size
+            return imageURLs.getList().size
         }
     }
 }
