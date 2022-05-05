@@ -14,12 +14,12 @@
     <fragment
         android:id="@+id/navigation_collection"
         android:name="com.example.biomecardapp2.ui.collections.CollectionsFragment"
-        android:label="@string/title_dashboard"
+        android:label="@string/title_collection"
         tools:layout="@layout/fragment_collections" />
 
     <fragment
         android:id="@+id/navigation_scan"
         android:name="com.example.biomecardapp2.ui.scan.ScanFragment"
-        android:label="@string/title_notifications"
+        android:label="@string/title_scan"
         tools:layout="@layout/fragment_scan" />
 </navigation>

@@ -9,21 +9,25 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.budiyev.android.codescanner.AutoFocusMode
-import com.budiyev.android.codescanner.CodeScanner
-import com.budiyev.android.codescanner.DecodeCallback
-import com.budiyev.android.codescanner.ErrorCallback
-import com.budiyev.android.codescanner.ScanMode
+import com.budiyev.android.codescanner.*
 import com.example.biomecardapp2.databinding.FragmentScanBinding
+import com.example.biomecardapp2.ui.collections.imageURLs
+import kotlinx.coroutines.*
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.net.HttpURLConnection
+import java.net.URL
 
 
 private const val CAMERA_REQUEST_CODE = 101
 
-class ScanFragment : Fragment(){
+class ScanFragment : Fragment() {
     private lateinit var codeScanner: CodeScanner
     private var _binding: FragmentScanBinding? = null
+    private var scannedcode: String = ""
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -36,19 +40,18 @@ class ScanFragment : Fragment(){
     ): View {
         super.onCreate(savedInstanceState)
 
-            ViewModelProvider(this).get(ScanViewModel::class.java)
+        ViewModelProvider(this).get(ScanViewModel::class.java)
 
         _binding = FragmentScanBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
 
 
         setupPermissions()
         codeScanner()
         return root
 
-
     }
+
 
     private fun codeScanner() {
         codeScanner = CodeScanner(this.requireContext(), binding.scannerView)
@@ -60,22 +63,76 @@ class ScanFragment : Fragment(){
             scanMode = ScanMode.CONTINUOUS
             isAutoFocusEnabled = true
             isFlashEnabled = false
-
+            var searchJob: Job? = null
             decodeCallback = DecodeCallback {
+                scannedcode = it.text
 
-                    binding.tvTextView.text = it.text
+
+                searchJob = CoroutineScope(Dispatchers.IO).launch {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            "Checking Card", Toast.LENGTH_SHORT
+                        ).show()
+                        codeScanner.stopPreview()
+                        binding.scannerView.isVisible = false
+                        binding.loader.isVisible = true
+                    }
+                    Log.i("Work", it.text)
+
+
+                    val url = URL("https://www.biomecard.at/wp-content/uploads/2022/05/cardID.json")
+                    val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+                    var jsonStr = ""
+                    try {
+                        jsonStr = connection.inputStream
+                            .bufferedReader().use(BufferedReader::readText)
+                    } finally {
+                        connection.disconnect()
+                    }
+                    try {
+                        val json = JSONObject(jsonStr) //same thing as jsonString but as type JSON
+                        try {
+                            imageURLs.addtoList(json.getString(it.text))
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    "Added Card", Toast.LENGTH_LONG
+                                ).show()
+                                codeScanner.startPreview()
+                                binding.scannerView.isVisible = true
+                                binding.loader.isVisible = false
+                            }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    "Didnt find it", Toast.LENGTH_LONG
+                                ).show()
+                                codeScanner.startPreview()
+                                binding.scannerView.isVisible = true
+                                binding.loader.isVisible = false
+                            }
+                        }
+
+                    } catch (e: Exception) {
+                        Log.i("ERror", "error ${e.message}")
+                    }
+                }
+
+
             }
 
             errorCallback = ErrorCallback {
-                    Log.e("Main", "Camera error ${it.message}")
+                Log.e("Main", "Camera error ${it.message}")
             }
         }
-        binding.scannerView.setOnClickListener{
-            codeScanner.startPreview()
-        }
+
+
     }
 
-    override fun onResume(){
+
+    override fun onResume() {
         super.onResume()
         codeScanner.startPreview()
     }
@@ -91,18 +148,22 @@ class ScanFragment : Fragment(){
         _binding = null
     }
 
-    private fun setupPermissions(){
-        val permission : Int = ContextCompat.checkSelfPermission(this.requireContext(),
-        android.Manifest.permission.CAMERA)
+    private fun setupPermissions() {
+        val permission: Int = ContextCompat.checkSelfPermission(
+            this.requireContext(),
+            android.Manifest.permission.CAMERA
+        )
 
-        if(permission != PackageManager.PERMISSION_GRANTED) {
+        if (permission != PackageManager.PERMISSION_GRANTED) {
             makeRequest()
         }
     }
 
     private fun makeRequest() {
-        ActivityCompat.requestPermissions(this.requireActivity(), arrayOf(android.Manifest.permission.CAMERA),
-        CAMERA_REQUEST_CODE)
+        ActivityCompat.requestPermissions(
+            this.requireActivity(), arrayOf(android.Manifest.permission.CAMERA),
+            CAMERA_REQUEST_CODE
+        )
     }
 
     override fun onRequestPermissionsResult(
@@ -110,14 +171,19 @@ class ScanFragment : Fragment(){
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        when (requestCode){
+        when (requestCode) {
             CAMERA_REQUEST_CODE -> {
-                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED){
-                    Toast.makeText(this.requireContext(), "You need the camera permission to be able to use this app!",
-                    Toast.LENGTH_SHORT).show()
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this.requireContext(),
+                        "You need the camera permission to be able to use this app!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
-                    Toast.makeText(this.requireContext(), "Successful",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this.requireContext(), "Successful",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }

@@ -1,10 +1,7 @@
 package com.example.biomecardapp2.ui.collections
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
-import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,11 +24,7 @@ class CollectionsFragment : Fragment() {
 
     private var _binding: FragmentCollectionsBinding? = null
     private lateinit var _binding2: ItemViewBinding
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
-    private var displayStringList: MutableList<String> = mutableListOf("https://images.metmuseum.org/CRDImages/es/web-large/DP-462-001.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg", "https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg","https://images.metmuseum.org/CRDImages/es/web-large/DT2954.jpg")
     private lateinit var adapter: MyAdapter
     private var imageJob: Job? = null
     var bitmap: Bitmap? = null
@@ -42,8 +34,6 @@ class CollectionsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val dashboardViewModel =
-            ViewModelProvider(this).get(CollectionsViewModel::class.java)
         _binding2 = ItemViewBinding.inflate(layoutInflater)
         _binding = FragmentCollectionsBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -56,26 +46,27 @@ class CollectionsFragment : Fragment() {
         )
         binding.myRecyclerview.addItemDecoration(divider)
 
+
         adapter = MyAdapter()
         binding.myRecyclerview.setAdapter(adapter)
         return root
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-    inner class MyViewHolder(val itemView: View) :
+    inner class MyViewHolder(private val itemView: View) :
         RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
 
         init {
-            //_binding2?.imageView?.setImageBitmap()
 
         }
 
-        fun setText(text: String, pictureUrl : String) {
+        fun setText(text: String, pictureUrl: String) {
             itemView.findViewById<TextView>(R.id.textview_cardtitle)
                 .setText(text)
             imageJob = CoroutineScope(Dispatchers.IO).launch {
@@ -96,7 +87,8 @@ class CollectionsFragment : Fragment() {
                 }
 
             }
-            while (imageJob!!.isActive){ }
+            while (imageJob!!.isActive) {
+            }
             Log.i("bitmap", "bitmap = ${bitmap}")
             itemView.findViewById<ImageView>(R.id.imageView)
                 .setImageBitmap(bitmap)
@@ -104,11 +96,8 @@ class CollectionsFragment : Fragment() {
         }
 
 
-
         override fun onClick(view: View?) {
-           /*
 
-            */
         }
 
     }
@@ -121,13 +110,13 @@ class CollectionsFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-            holder.setText("Card No. ${position}", displayStringList[position])
-            Log.i("bitmap", "url = ${displayStringList[position]}")
+            holder.setText("Card No. ${position}", imageURLs.getList().get(position))
+            Log.i("bitmap", "url = ${imageURLs.getList().get(position)}")
 
         }
 
         override fun getItemCount(): Int {
-            return displayStringList.size
+            return imageURLs.getList().size
         }
     }
 }
